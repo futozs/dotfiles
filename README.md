@@ -8,7 +8,7 @@ cd ~/Developer/personal/dotfiles && ./install.sh --all
 ./macos.sh
 ```
 
-Az `install.sh` feltelepíti a `Brewfile` tartalmát, symlinkeli a konfigokat a helyükre, és beimportálja a shell-előzményeket az atuinba. A `--all` kapcsolóval a [claude-setup](https://github.com/futozs/claude-setup) és a [vscode-setup](https://github.com/futozs/vscode-setup) repót is leklónozza és telepíti. Amit felülír, azt előtte a `~/dotfiles-backups/<időbélyeg>/` mappába menti. A már telepített csomagokat nem frissíti. Bármikor újrafuttatható.
+Az `install.sh` feltelepíti a `Brewfile` tartalmát, symlinkeli a konfigokat a helyükre, és beimportálja a shell-előzményeket az atuinba. A `--all` kapcsolóval a [claude-setup](https://github.com/futozs/claude-setup) és a [vscode-setup](https://github.com/futozs/vscode-setup) repót is leklónozza és telepíti. Amit felülír, azt előtte a `~/Documents/Backups/dotfiles/<időbélyeg>/` mappába menti. A már telepített csomagokat nem frissíti. Bármikor újrafuttatható.
 
 A `macos.sh` külön fájl, és szándékosan nem fut automatikusan: rendszerbeállításokat ír, ezért érdemes átolvasni, mielőtt elindítod.
 
@@ -54,18 +54,43 @@ A `~/.gitconfig` helyi fájl marad (név, e-mail, gépspecifikus beállítások)
 ## macOS (`macos.sh`)
 
 - Gyors billentyűismétlés. Kikapcsolva az automatikus javítás, az okos idézőjelek és gondolatjelek, mert ezek elrontják a kódot a böngészős mezőkben.
-- Finder: látszanak a kiterjesztések, a rejtett fájlok, az útvonalsáv. Lista nézet, mappák elöl, új ablak a `~/Developer`-ben nyílik. Hálózati meghajtón és USB-n nem jön létre `.DS_Store`.
+- Finder: látszanak a kiterjesztések és az útvonalsáv. A rejtett fájlok rejtve maradnak, a `Cmd+Shift+.` mutatja meg őket. Lista nézet, mappák elöl, új ablak a `~/Developer`-ben nyílik. Hálózati meghajtón és USB-n nem jön létre `.DS_Store`.
 - Dock: késleltetés nélküli auto-hide, nincsenek „legutóbbi” appok, a Spaces sorrendje nem változik magától.
 - Képernyőfotók: a `~/Pictures/Screenshots` mappába, PNG-ben, ablakárnyék nélkül.
 
-## Mappaszerkezet
+## Letöltések: magától rendeződik
+
+A `bin/sort-downloads` 10 percenként szétpakolja a `~/Downloads` mappát típus és hónap szerint. A Hazelt váltja ki, ingyen, 80 sor zsh-ban.
+
+```
+~/Downloads/
+├── Képek/2026-11/
+├── Dokumentumok/2026-11/
+├── Táblázatok/  Prezentációk/  Archívumok/  Kód/  Mobil/  Videók/  Hang/
+├── Telepítők/   Torrentek/      ← 7 nap után a Kukába kerülnek
+├── Mappák/      kicsomagolt vagy letöltött mappák, egészben
+└── Egyéb/
+```
+
+- A 10 percnél frissebb fájlokhoz nem nyúl, így a böngészőből még meg tudod nyitni, amit épp letöltöttél. A félig letöltött fájlokat (`.crdownload`, `.download`, `.part`) kihagyja.
+- Nem ír felül semmit: névütközésnél „(2)” utótagot kap a fájl. Véglegesen nem töröl, a telepítők és a torrentek is csak a Kukába kerülnek.
+- Kézzel is futtatható: `sort-downloads --dry-run` megmutatja, mit mozgatna.
+- A LaunchAgent egy kis „Downloads Sorter” appot indít, ami futtatja a scriptet. Erre azért van szükség, mert a macOS háttérben futó shell scriptnek nem ad hozzáférést a Letöltésekhez, egy appnak viszont egyszeri engedéllyel igen. Napló: `~/Library/Logs/sort-downloads.log`.
+
+## Rend a home mappában
+
+- **Kód:** csak a `~/Developer` alatt.
+- **Mentések** (a három setup repó installere is): `~/Documents/Backups/`.
+- **Képernyőfotók:** `~/Pictures/Screenshots/`.
+- **A home gyökerében** csak a macOS saját mappái és a `Developer` van.
+- **A ponttal kezdődő mappák** (`.npm`, `.cargo`, `.config`…) a toolok beállításai és cache-ei. A Finder elrejti őket, a `Cmd+Shift+.` megmutatja.
 
 ```
 ~/Developer/
 ├── clients/    ügyfélprojektek
 ├── personal/   saját projektek, köztük ez a három setup repó
 ├── school/     iskola, versenyek
-├── archive/    régi verziók
+├── archive/    régi és lezárt projektek
 └── sandbox/    kísérletek
 ```
 

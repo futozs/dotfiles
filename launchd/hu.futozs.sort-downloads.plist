@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- install.sh replaces __APP__ and loads it into ~/Library/LaunchAgents. -->
+<plist version="1.0">
+<dict>
+    <key>Label</key><string>hu.futozs.sort-downloads</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/open</string>
+        <string>-g</string>
+        <string>-j</string>
+        <string>__APP__</string>
+    </array>
+    <key>StartInterval</key><integer>600</integer>
+    <key>RunAtLoad</key><true/>
+    <key>ProcessType</key><string>Background</string>
+</dict>
+</plist>

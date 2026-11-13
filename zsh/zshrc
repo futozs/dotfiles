@@ -17,7 +17,7 @@ source "$ZSH/oh-my-zsh.sh"
 
 # ---------- PATH ----------
 export BUN_INSTALL="$HOME/.bun"
-path=("$HOME/.local/bin" "$BUN_INSTALL/bin" $path)
+path=("$DOTFILES/bin" "$HOME/.local/bin" "$BUN_INSTALL/bin" $path)
 [[ -s "$BUN_INSTALL/_bun" ]] && source "$BUN_INSTALL/_bun"
 
 # ---------- History ----------

@@ -3,12 +3,12 @@
 #   ./install.sh            Homebrew packages, config symlinks, shell history import
 #   ./install.sh --all      same, plus clone and install claude-setup and vscode-setup
 #   ./install.sh --links    only (re)create symlinks, no network
-# Safe to re-run. Anything it replaces goes to ~/dotfiles-backups/<timestamp>/ first.
+# Safe to re-run. Anything it replaces goes to ~/Documents/Backups/dotfiles/<timestamp>/ first.
 # macOS preferences are separate on purpose: run ./macos.sh yourself.
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKUP="$HOME/dotfiles-backups/$(date +%Y%m%d-%H%M%S)"
+BACKUP="$HOME/Documents/Backups/dotfiles/$(date +%Y%m%d-%H%M%S)"
 MODE="${1:-}"
 
 say() { printf '\033[1m==>\033[0m %s\n' "$*"; }
@@ -60,6 +60,29 @@ if [ "$MODE" != "--links" ] && command -v atuin >/dev/null && [ ! -f "$HOME/.loc
   say "Importing shell history into atuin"
   atuin import auto && mkdir -p "$HOME/.local/share/atuin" && touch "$HOME/.local/share/atuin/.imported"
 fi
+
+say "Downloads auto-sort (every 10 minutes)"
+# Wrapped in a tiny app: macOS privacy rules block launchd shell scripts from ~/Downloads, but
+# let an app ask once. Rebuilt only when its source changes, since a rebuild resets that permission.
+APP_DIR="$HOME/Library/Application Support/hu.futozs.sort-downloads"
+APP="$APP_DIR/Downloads Sorter.app"
+SRC="$(sed -e "s#__SCRIPT__#$REPO/bin/sort-downloads#" -e "s#__LOG__#$HOME/Library/Logs/sort-downloads.log#" \
+  "$REPO/launchd/DownloadsSorter.applescript")"
+mkdir -p "$APP_DIR" "$HOME/Library/LaunchAgents" "$HOME/Library/Logs"
+if [ ! -d "$APP" ] || [ "$SRC" != "$(cat "$APP_DIR/source.applescript" 2>/dev/null)" ]; then
+  rm -rf "$APP"
+  printf '%s\n' "$SRC" > "$APP_DIR/source.applescript"
+  osacompile -o "$APP" "$APP_DIR/source.applescript"
+  plutil -replace CFBundleIdentifier -string hu.futozs.sort-downloads "$APP/Contents/Info.plist"
+  plutil -replace LSUIElement -bool true "$APP/Contents/Info.plist"
+  codesign --force --sign - "$APP" 2>/dev/null
+  echo "   built $APP (macOS will ask once for Downloads access)"
+fi
+AGENT="$HOME/Library/LaunchAgents/hu.futozs.sort-downloads.plist"
+sed -e "s#__APP__#$APP#" "$REPO/launchd/hu.futozs.sort-downloads.plist" > "$AGENT"
+launchctl bootout "gui/$(id -u)" "$AGENT" 2>/dev/null || true
+launchctl bootstrap "gui/$(id -u)" "$AGENT"
+echo "   $AGENT"
 
 if [ "$MODE" = "--all" ]; then
   for repo in claude-setup vscode-setup; do

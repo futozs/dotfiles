@@ -13,9 +13,8 @@ defaults write -g NSAutomaticSpellingCorrectionEnabled -bool false
 defaults write -g NSAutomaticPeriodSubstitutionEnabled -bool false
 defaults write -g NSAutomaticCapitalizationEnabled -bool false
 
-echo "==> Finder: extensions, hidden files, path bar, list view, folders first"
+echo "==> Finder: extensions, path bar, list view, folders first (Cmd+Shift+. toggles hidden files)"
 defaults write -g AppleShowAllExtensions -bool true
-defaults write com.apple.finder AppleShowAllFiles -bool true
 defaults write com.apple.finder ShowPathbar -bool true
 defaults write com.apple.finder ShowStatusBar -bool true
 defaults write com.apple.finder FXPreferredViewStyle -string Nlsv

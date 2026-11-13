@@ -1,0 +1,77 @@
+#!/bin/zsh
+# Keeps ~/Downloads sorted: <Category>/<YYYY-MM>/<file>, by the date the item landed there.
+#   sort-downloads              sort now
+#   sort-downloads --dry-run    print what would move, change nothing
+# Runs every 10 minutes from a LaunchAgent (see launchd/). Installers and torrents go to the
+# Trash after TRASH_AFTER_DAYS; nothing is deleted outright.
+setopt null_glob no_case_glob
+
+DL="${SORT_DOWNLOADS_DIR:-$HOME/Downloads}"
+MIN_AGE_SECONDS=600       # fresh downloads stay put so you can still open them from the browser
+TRASH_AFTER_DAYS=7
+DRY=0; [[ "${1:-}" == --dry-run ]] && DRY=1
+
+typeset -A CATEGORY
+for e in png jpg jpeg heic heif gif webp svg avif tif tiff bmp ico psd fig sketch; CATEGORY[$e]=Képek
+for e in mp4 mov m4v mkv webm avi;                         CATEGORY[$e]=Videók
+for e in mp3 m4a wav flac aac ogg aiff;                    CATEGORY[$e]=Hang
+for e in pdf doc docx pages rtf odt txt md epub;           CATEGORY[$e]=Dokumentumok
+for e in xls xlsx xlsm csv numbers ods;                    CATEGORY[$e]=Táblázatok
+for e in ppt pptx key odp;                                 CATEGORY[$e]=Prezentációk
+for e in zip rar 7z tar gz tgz bz2 xz;                     CATEGORY[$e]=Archívumok
+for e in dmg pkg iso app;                                  CATEGORY[$e]=Telepítők
+for e in torrent;                                          CATEGORY[$e]=Torrentek
+for e in sql json yml yaml toml xml js ts jsx tsx py sh html css conf env sarif log; CATEGORY[$e]=Kód
+for e in apk xapk apkm ipa;                                CATEGORY[$e]=Mobil
+for e in ttf otf woff woff2;                               CATEGORY[$e]=Betűtípusok
+CATEGORIES=(${(u)${(v)CATEGORY}} Egyéb Mappák)
+DISPOSABLE=(Telepítők Torrentek)
+
+now=$(date +%s)
+
+# First free path: "name.ext", then "name (2).ext", "name (3).ext"...
+free_path() {
+  local target="$1" dir="${1:h}" file="${1:t}" stem ext n=2
+  if [[ "$file" == *.* && "$file" != .* ]]; then stem="${file%.*}"; ext=".${file##*.}"; else stem="$file"; ext=""; fi
+  while [[ -e "$target" ]]; do target="$dir/$stem ($n)$ext"; (( n++ )); done
+  print -r -- "$target"
+}
+
+move() { # move <src> <dest-dir>
+  local dest; dest="$(free_path "$2/${1:t}")"
+  if (( DRY )); then print -r -- "would move  ${1#$DL/}  ->  ${dest#$HOME/}"; return; fi
+  # A read-only folder (common when unzipped) cannot be moved to another parent until it is writable.
+  [[ -d "$1" && ! -w "$1" ]] && chmod u+w "$1"
+  mkdir -p "$2" && mv -n "$1" "$dest" && print -r -- "moved  ${1#$DL/}  ->  ${dest#$HOME/}"
+}
+
+for item in "$DL"/*; do
+  name="${item:t}"
+  (( ${CATEGORIES[(Ie)$name]} )) && continue
+  [[ "$name" == *.(crdownload|download|part|partial|tmp|opdownload) ]] && continue
+
+  born=$(stat -f %B "$item") || continue
+  (( now - born < MIN_AGE_SECONDS )) && continue
+
+  if [[ -d "$item" && "$name" != *.app ]]; then
+    category=Mappák
+  else
+    ext="${${name:e}:l}"
+    category="${CATEGORY[$ext]:-Egyéb}"
+  fi
+  move "$item" "$DL/$category/$(date -r "$born" +%Y-%m)"
+done
+
+for category in $DISPOSABLE; do
+  for item in "$DL/$category"/*/*; do
+    born=$(stat -f %B "$item") || continue
+    (( now - born < TRASH_AFTER_DAYS * 86400 )) && continue
+    move "$item" "$HOME/.Trash"
+  done
+done
+
+(( DRY )) || for category in $CATEGORIES; do
+  [[ -d "$DL/$category" ]] && find "$DL/$category" -mindepth 1 -type d -empty -delete
+  [[ -d "$DL/$category" ]] && rmdir "$DL/$category" 2>/dev/null
+done
+exit 0
