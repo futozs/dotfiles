@@ -65,7 +65,6 @@ cask "helium-browser"   # Chromium without Google, uBlock Origin built in
 cask "raycast"          # launcher, clipboard history, window management
 cask "orbstack"         # Docker and Linux VMs, lighter than Docker Desktop/colima
 cask "visual-studio-code"
-cask "bitwarden"
 cask "codexbar"
 cask "another-redis-desktop-manager"
 

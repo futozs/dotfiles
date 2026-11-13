@@ -22,7 +22,7 @@ A `macos.sh` külön fájl, és szándékosan nem fut automatikusan: rendszerbe�
 | [OrbStack](https://orbstack.dev) | Docker, Linux VM | Gyorsabban indul és kevesebb memóriát eszik, mint a Docker Desktop vagy a colima. |
 | [VS Code](https://code.visualstudio.com) | Editor | Beállítva: [vscode-setup](https://github.com/futozs/vscode-setup). |
 | [Claude Code](https://claude.com/claude-code) | AI | Beállítva: [claude-setup](https://github.com/futozs/claude-setup). |
-| Bitwarden | Jelszókezelő | |
+| Apple Passwords | Jelszókezelő | Beépített, a rendszerrel szinkronizál. |
 
 ## Shell
 
