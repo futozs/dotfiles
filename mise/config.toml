@@ -1,0 +1,5 @@
+# Global mise settings. Projects pin their own versions in .nvmrc, .node-version,
+# .tool-versions or mise.toml; outside a project the Homebrew node/bun stay in use.
+[settings]
+idiomatic_version_file_enable_tools = ["node", "bun", "python"]
+experimental = false

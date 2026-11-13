@@ -1,0 +1,13 @@
+# Local-only history: nothing is synced unless you run `atuin login` yourself.
+auto_sync = false
+update_check = false
+style = "compact"
+inline_height = 20
+show_preview = true
+enter_accept = false        # Enter puts the command on the prompt; edit it, then Enter again
+search_mode = "fuzzy"
+filter_mode = "global"
+workspaces = true           # inside a git repo, Ctrl+R starts with that repo's history
+history_filter = [
+  "^export .*(TOKEN|KEY|SECRET|PASSWORD)",
+]
