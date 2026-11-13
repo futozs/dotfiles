@@ -66,7 +66,6 @@ cask "raycast"          # launcher, clipboard history, window management
 cask "orbstack"         # Docker and Linux VMs, lighter than Docker Desktop/colima
 cask "visual-studio-code"
 cask "codexbar"
-cask "another-redis-desktop-manager"
 
 # --- Fonts ---
 cask "font-jetbrains-mono-nerd-font"
